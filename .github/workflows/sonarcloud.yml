@@ -15,6 +15,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Dar permisos de ejecución al Gradle Wrapper
+  run: chmod +x gradlew
+  
         with:
           fetch-depth: 0  # Sonar necesita historial completo para análisis
 
