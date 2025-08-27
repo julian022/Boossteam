@@ -1,0 +1,67 @@
+name: CI - Build, Test, Coverage, SonarCloud
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+
+    env:
+      SPRING_PROFILES_ACTIVE: test
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Gradle - version info
+        run: ./gradlew -version
+
+      - name: Grant execute permission for Gradle
+        run: chmod +x gradlew
+
+      # Ejecuta tests con stacktrace y logs detallados
+      - name: Build & Test (with reports)
+        run: ./gradlew clean build -x test --stacktrace --info
+        #run: ./gradlew clean build jacocoTestReport --stacktrace --info
+
+      # Subir SIEMPRE los reportes de test para ver el fallo exacto
+      - name: Upload unit-test report (HTML)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: build/reports/tests/test
+
+      - name: Upload JaCoCo report (HTML)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: build/reports/jacoco/test/html
+
+      - name: SonarCloud analysis
+        run: ./gradlew sonar --stacktrace --info
