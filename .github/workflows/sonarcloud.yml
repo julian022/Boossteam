@@ -1,4 +1,4 @@
-name: CI - Build, Test, Coverage, SonarCloud
+name: CI - Build, Test, Coverage (Automatic SonarCloud ON)
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
 
     env:
       SPRING_PROFILES_ACTIVE: test
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # <- no se usa en Opción B, pero lo dejamos por si luego migras
 
     steps:
       - name: Checkout
@@ -33,7 +33,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      # (Opcional) Cache de SonarCloud - NO necesaria en Opción B, pero la dejamos por si migras a Gradle sonar
       - name: Cache SonarCloud packages
+        if: false   # <- desactivado en Opción B (no usamos sonar vía Gradle)
         uses: actions/cache@v4
         with:
           path: ~/.sonar/cache
@@ -43,28 +45,30 @@ jobs:
       - name: Gradle - version info
         run: ./gradlew -version
 
-      # ======== Build + Tests + Coverage (RECOMENDADO) ========
-      # Nota: antes usabas "build -x test" (omitía pruebas). Aquí sí ejecutamos tests.
+      # ====== Build + Tests + Coverage (recomendado) ======
+      # Antes tenías "build -x test" (saltaba pruebas). Aquí sí ejecutamos tests y cobertura.
       - name: Build, Test & Coverage (JaCoCo)
         run: |
           ./gradlew --no-daemon clean test jacocoTestReport jacocoTestCoverageVerification
 
-      # ======== Análisis SonarCloud vía Gradle (RECOMENDADO) ========
-      # IMPORTANTE: en SonarCloud desactiva "Automatic Analysis" si usas este paso.
-      - name: SonarCloud analysis (Gradle 'sonar')
-        run: |
-          ./gradlew --no-daemon sonar \
-            -Dsonar.token="${SONAR_TOKEN}" \
-            -Dsonar.gradle.skipCompile=true
-        # Si definiste sonar.host.url/organization/projectKey en gradle.properties no hace falta pasarlos aquí.
+      # ====== NO ejecutar análisis Sonar con Gradle (Opción B) ======
+      # Deja el análisis Automático de SonarCloud activo en la UI.
+      # Si algún día cambias a Gradle sonar, descomenta este paso y APAGA el automático en SonarCloud.
+      # - name: SonarCloud analysis (Gradle 'sonar')  # <-- desactivado en Opción B
+      #   if: false
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #   run: |
+      #     ./gradlew --no-daemon sonar \
+      #       -Dsonar.token="${SONAR_TOKEN}" \
+      #       -Dsonar.gradle.skipCompile=true
 
-      # ======== Artefactos de reportes (siempre) ========
+      # ====== Subir reportes HTML para depurar siempre ======
       - name: Upload unit-test report (HTML)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-report
-          # Usa glob doble por si migras a multi-módulo en el futuro
           path: '**/build/reports/tests/test'
           if-no-files-found: warn
           retention-days: 7
@@ -77,19 +81,3 @@ jobs:
           path: '**/build/reports/jacoco/test/html'
           if-no-files-found: warn
           retention-days: 7
-
-      # ======== OPCIONAL: Análisis SonarCloud con la Action oficial (ALTERNATIVA) ========
-      # Usa ESTO solo si NO ejecutas el paso 'sonar' de Gradle arriba.
-      # Asegúrate también de tener desactivado "Automatic Analysis".
-      # - name: SonarCloud Scan (official action)  # <-- ALTERNATIVA (comentado)
-      #   if: false                              # habilítalo si quieres probar esta vía
-      #   uses: SonarSource/sonarcloud-github-action@v2
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     args: >
-      #       -Dsonar.host.url=https://sonarcloud.io
-      #       -Dsonar.organization=<tu_org>
-      #       -Dsonar.projectKey=<tu_projectKey>
-      #       -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml
