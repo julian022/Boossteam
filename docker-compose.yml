@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: bossteam
+      MYSQL_DATABASE: boossteam_db
+    networks:
+      - appnet
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./bossteamDB.sql:/docker-entrypoint-initdb.d/init.sql
+
+networks:
+  appnet:
+    driver: bridge
+
+volumes:
+  mysql_data:
