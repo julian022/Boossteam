@@ -1,4 +1,4 @@
-package co.edu.uniajc.CRM;
+package co.edu.uniajc.crm;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
