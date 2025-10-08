@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   api:
-    image: boossteam-api:latest         # construyes esta imagen con 'docker build'
+    image: cebarco/boossteam-api:latest         # construyes esta imagen con 'docker build'
     container_name: boossteam-api
     environment:
       # DB en el contenedor 'mysql' (ya lo tienes corriendo) dentro de la red appnet

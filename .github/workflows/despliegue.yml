@@ -15,3 +15,23 @@ jobs:
         run: echo ${{ secrets.DOCKER_PASS }} | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKER_USER }}/boossteam-api:latest
+      - name: Conectar al servidor EC2 y desplegar
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+             echo "Pulling latest Docker image..."
+             docker pull cebarco/boossteam-api:latest
+             echo "Restarting container..."
+             docker stop boossteam-api || true
+             docker rm boossteam-api || true
+             docker run -d --name boossteam-api \
+                --network appnet \
+                -p 8089:8089 \
+                -e SPRING_DATASOURCE_URL="jdbc:mysql://mysql:3306/boossteam_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC" \
+               -e SPRING_DATASOURCE_USERNAME="root" \
+               -e SPRING_DATASOURCE_PASSWORD="bossteam" \
+                cebarco/boossteam-api:latest

@@ -1,56 +1,43 @@
 package co.edu.uniajc.crm.service;
 
+import co.edu.uniajc.crm.dto.ProyectoRequest;
+import co.edu.uniajc.crm.dto.ProyectoResponse;
+import co.edu.uniajc.crm.exception.NotFoundException;
+import co.edu.uniajc.crm.mapper.ProyectoMapper;
 import co.edu.uniajc.crm.model.Proyecto;
 import co.edu.uniajc.crm.repository.ProyectoRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-@Service
+@Service @RequiredArgsConstructor
 public class ProyectoService {
 
-    private final ProyectoRepository proyectoRepository;
+    private final ProyectoRepository repo;
 
-    public ProyectoService(ProyectoRepository proyectoRepository) {
-        this.proyectoRepository = proyectoRepository;
+    public ProyectoResponse crear(ProyectoRequest req) {
+        var p = ProyectoMapper.toEntity(req);
+        return ProyectoMapper.toResponse(repo.save(p));
     }
 
-    // CRUD
-    public List<Proyecto> getAllProyectos() {
-        return proyectoRepository.findAll();
+    public ProyectoResponse buscarPorId(Long id) {
+        var p = repo.findById(id).orElseThrow(() -> new NotFoundException("Proyecto no encontrado"));
+        return ProyectoMapper.toResponse(p);
     }
 
-    public Proyecto saveProyecto(Proyecto proyecto) {
-        return proyectoRepository.save(proyecto);
+    public List<ProyectoResponse> listar() {
+        return repo.findAll().stream().map(ProyectoMapper::toResponse).toList();
     }
 
-    public Proyecto getProyectoById(Long id) {
-        return proyectoRepository.findById(id).orElse(null);
+    public ProyectoResponse actualizar(Long id, ProyectoRequest req) {
+        var p = repo.findById(id).orElseThrow(() -> new NotFoundException("Proyecto no encontrado"));
+        ProyectoMapper.update(p, req);
+        return ProyectoMapper.toResponse(repo.save(p));
     }
 
-    public Proyecto updateProyecto(Long id, Proyecto proyectoDetails) {
-        return proyectoRepository.findById(id)
-                .map(proyecto -> {
-                    proyecto.setNombre(proyectoDetails.getNombre());
-                    proyecto.setEstado(proyectoDetails.getEstado());
-                    proyecto.setMonto(proyectoDetails.getMonto());
-                    proyecto.setFechaCreacion(proyectoDetails.getFechaCreacion());
-                    proyecto.setUltimaActualizacion(proyectoDetails.getUltimaActualizacion());
-                    return proyectoRepository.save(proyecto);
-                })
-                .orElse(null);
-    }
-
-    public void deleteProyecto(Long id) {
-        proyectoRepository.deleteById(id);
-    }
-
-    // Reporte simple: conteo por estado
-    public Map<String, Long> contarPorEstado() {
-        return proyectoRepository.findAll().stream()
-                .collect(Collectors.groupingBy(Proyecto::getEstado, Collectors.counting()));
+    public void eliminar(Long id) {
+        var p = repo.findById(id).orElseThrow(() -> new NotFoundException("Proyecto no encontrado"));
+        p.setActive(false);
+        repo.save(p);
     }
 }
-
