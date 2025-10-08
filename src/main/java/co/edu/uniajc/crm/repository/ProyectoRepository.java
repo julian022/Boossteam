@@ -1,6 +1,6 @@
-package co.edu.uniajc.CRM.repository;
+package co.edu.uniajc.crm.repository;
 
-import co.edu.uniajc.CRM.model.Proyecto;
+import co.edu.uniajc.crm.model.Proyecto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

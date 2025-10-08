@@ -1,61 +1,86 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.3.3'
-    id 'io.spring.dependency-management' version '1.1.6'
-    id 'org.sonarqube' version '5.1.0.4882'
+    id 'org.springframework.boot' version '3.5.4'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.sonarqube' version '4.4.1.3373'
+    id 'jacoco'
 }
 
 group = 'co.edu.uniajc'
 version = '0.0.1-SNAPSHOT'
-description = 'Sistema de gestion y relacion con los clientes'
+description = 'Sistema de gestión y relación con los clientes'
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
+    toolchain { languageVersion = JavaLanguageVersion.of(17) }
 }
 
-repositories {
-    mavenCentral()
+configurations {
+    compileOnly { extendsFrom annotationProcessor }
 }
+
+repositories { mavenCentral() }
 
 dependencies {
-    // Web y JPA
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
-
-
-
-
-    // Flyway (Core + MySQL)
+    implementation 'org.hibernate.validator:hibernate-validator'  // provider de Bean Validation
     implementation 'org.flywaydb:flyway-core'
-    implementation 'org.flywaydb:flyway-mysql'
+    implementation 'org.springframework.security:spring-security-crypto'
 
-    // Lombok
+    implementation 'com.mysql:mysql-connector-j'
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13"
+
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    // Driver MySQL
-    runtimeOnly 'com.mysql:mysql-connector-j:8.4.0'
-
-    // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
 
-    // H2 para tests
-    testImplementation 'com.h2database:h2:2.2.224'
+springBoot {
+    // Ajusta al paquete exacto donde quedó tu clase main:
+    mainClass = 'co.edu.uniajc.crm.CrmApplication'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy 'jacocoTestReport'
 }
 
-sonarqube {
+jacoco { toolVersion = '0.8.11' }
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        csv.required = false
+        html.required = true
+    }
+}
+sourceSets {
+    main {
+        java {
+            // incluye tu carpeta 'java' actual y la estándar por si luego migras
+            srcDirs = ['java', 'src/main/java']
+        }
+        resources {
+            // incluye tu carpeta 'resources' actual y la estándar
+            srcDirs = ['resources', 'src/main/resources']
+        }
+    }
+    test {
+        java { srcDirs = ['src/test/java'] }
+        resources { srcDirs = ['src/test/resources'] }
+    }
+}
+
+
+sonar {
     properties {
-        property "sonar.projectKey", "TU_ORG_TU_PROYECTO"      // cámbialo
-        property "sonar.organization", "TU_ORG"                // cámbialo
         property "sonar.host.url", "https://sonarcloud.io"
-        property "sonar.java.coveragePlugin", "jacoco"
+        property "sonar.organization", "julian022"
+        property "sonar.projectKey", "julian022_Boossteam"
+        property "sonar.junit.reportPaths", "build/test-results/test"
+        property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
     }
 }

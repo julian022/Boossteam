@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  api:
+    image: boossteam-api:latest         # construyes esta imagen con 'docker build'
+    container_name: boossteam-api
+    environment:
+      # DB en el contenedor 'mysql' (ya lo tienes corriendo) dentro de la red appnet
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/boossteam_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: superseguro123
+
+      # Puerto de Spring (tu SG expone 8089)
+      SERVER_PORT: 8089
+    networks:
+      - appnet
+    ports:
+      - "8089:8089"   # expone la API públicamente en 8089
+    restart: unless-stopped
+    # (Opcional) healthcheck si tienes actuator
+    # healthcheck:
+    #   test: ["CMD", "wget", "-qO-", "http://localhost:8089/actuator/health"]
+    #   interval: 15s
+    #   timeout: 5s
+    #   retries: 8
+
+# Usa la red appnet que ya existe (creada fuera de compose)
+networks:
+  appnet:
+    external: true

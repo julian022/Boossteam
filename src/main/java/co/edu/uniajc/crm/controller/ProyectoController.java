@@ -1,7 +1,7 @@
-package co.edu.uniajc.CRM.controller;
+package co.edu.uniajc.crm.controller;
 
-import co.edu.uniajc.CRM.model.Proyecto;
-import co.edu.uniajc.CRM.service.ProyectoService;
+import co.edu.uniajc.crm.model.Proyecto;
+import co.edu.uniajc.crm.service.ProyectoService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

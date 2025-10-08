@@ -1,7 +1,7 @@
-package co.edu.uniajc.CRM.service;
+package co.edu.uniajc.crm.service;
 
-import co.edu.uniajc.CRM.model.Proyecto;
-import co.edu.uniajc.CRM.repository.ProyectoRepository;
+import co.edu.uniajc.crm.model.Proyecto;
+import co.edu.uniajc.crm.repository.ProyectoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

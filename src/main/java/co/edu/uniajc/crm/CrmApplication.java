@@ -1,4 +1,4 @@
-package co.edu.uniajc.CRM;
+package co.edu.uniajc.crm;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,4 +9,3 @@ public class CrmApplication {
         SpringApplication.run(CrmApplication.class, args);
     }
 }
-

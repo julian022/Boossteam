@@ -1,4 +1,4 @@
-package co.edu.uniajc.CRM.model;
+package co.edu.uniajc.crm.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
