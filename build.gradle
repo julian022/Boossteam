@@ -6,7 +6,7 @@ plugins {
     id 'jacoco'
 }
 
-group = 'co.edu.uniajc'
+group = 'co.edu.uniajc.crm'
 version = '0.0.1-SNAPSHOT'
 description = 'Sistema de gestión y relación con los clientes'
 
@@ -21,19 +21,25 @@ configurations {
 repositories { mavenCentral() }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.hibernate.validator:hibernate-validator'  // provider de Bean Validation
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.springframework.security:spring-security-crypto'
-
     implementation 'com.mysql:mysql-connector-j'
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13"
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+    implementation 'org.projectlombok:lombok'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    runtimeOnly 'com.mysql:mysql-connector-j:9.1.0'
+    runtimeOnly 'org.springframework.boot:spring-boot-devtools'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.h2database:h2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
@@ -47,7 +53,21 @@ tasks.named('test') {
     finalizedBy 'jacocoTestReport'
 }
 
-jacoco { toolVersion = '0.8.11' }
+jacoco {
+    toolVersion = '0.8.12' // o la más reciente compatible
+}
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.80
+            }
+        }
+    }
+}
+check.dependsOn jacocoTestCoverageVerification
 
 jacocoTestReport {
     dependsOn test
@@ -84,3 +104,9 @@ sonar {
         property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
     }
 }
+sonarqube {
+    properties {
+        property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
+    }
+}
+
