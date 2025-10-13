@@ -12,9 +12,9 @@ public class OpenApiConfig {
     public OpenAPI crmOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Boossteam CRM – API HU5 (´Proyecto)")
+                        .title("Boossteam CRM – API")
                         .version("1.0.0")
-                        .description("Endpoints de gestión de usuarios (HU5). Rutas en español."));
+                        .description("Endpoints de gestión de CRM. Rutas en español."));
     }
 
     @Bean
@@ -25,12 +25,11 @@ public class OpenApiConfig {
                 .build();
     }
     @Bean
-    public GroupedOpenApi proyectoGroup() {
+    public GroupedOpenApi proyectosGroup() {
         return GroupedOpenApi.builder()
-                .group("Proyectos")
+                .group("proyectos")
                 .pathsToMatch("/api/proyectos/**")
                 .build();
     }
-
 }
 
