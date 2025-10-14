@@ -31,5 +31,14 @@ public class OpenApiConfig {
                 .pathsToMatch("/api/proyectos/**")
                 .build();
     }
+    // jbarrera
+    @Bean
+    public GroupedOpenApi ventasGroup() {
+        return GroupedOpenApi.builder()
+                .group("ventas")
+                .pathsToMatch("/api/ventas/**")
+                .build();
+    }
+
 }
 
